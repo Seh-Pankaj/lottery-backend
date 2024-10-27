@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\Panka\\blockchainProjects\\1DayCourse\\lottery-project-backend\\contracts\\lottery.sol": {
-      "lastModificationDate": 1707821748991,
-      "contentHash": "8da539563ec7ef3c38677f41594c8117",
+      "lastModificationDate": 1710835604047,
+      "contentHash": "f243494c55a0a6487d260b61c40be9c8",
       "sourceName": "contracts/lottery.sol",
       "solcConfig": {
         "version": "0.8.7",

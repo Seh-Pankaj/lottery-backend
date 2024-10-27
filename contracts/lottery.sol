@@ -15,7 +15,7 @@ import "@chainlink/contracts/src/v0.8/automation/interfaces/KeeperCompatibleInte
 /* Errors */
 error Lottery__NotEnoughETHEntered();
 error Lottery__WithdrawCallFailed();
-error Lottery__closed();
+error Lottery__Closed();
 error Lottery__noUpkeepNeeded(
     uint256 currBalance,
     uint256 players,
@@ -30,7 +30,7 @@ error Lottery__noUpkeepNeeded(
  */
 
 contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
-    /* Type Declrations */
+    /* Type Declarations */
     enum LotteryState {
         OPEN,
         CALCULATING
@@ -73,11 +73,12 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         i_callbackGasLimit = callbackGasLimit;
         s_lotteryState = LotteryState.OPEN;
         i_interval = interval;
+        s_lastTimeStamp = block.timestamp;
     }
 
     function enterLottery() public payable {
         if (msg.value < i_entranceFee) revert Lottery__NotEnoughETHEntered();
-        if (s_lotteryState != LotteryState.OPEN) revert Lottery__closed();
+        if (s_lotteryState != LotteryState.OPEN) revert Lottery__Closed();
         s_players.push(payable(msg.sender));
 
         // Emit an event every time players array is updated
@@ -95,7 +96,12 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
      */
     function checkUpkeep(
         bytes memory /* checkData */
-    ) public override returns (bool upkeep, bytes memory /* performData */) {
+    )
+        public
+        view
+        override
+        returns (bool upkeep, bytes memory /* performData */)
+    {
         bool isOpen = (LotteryState.OPEN == s_lotteryState);
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
@@ -103,7 +109,7 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         upkeep = (isOpen && timePassed && hasPlayers && hasBalance);
     }
 
-    function performUpkeep(bytes memory /* performData */) external override {
+    function performUpkeep(bytes calldata /* performData */) external override {
         // Request random number
         // Chainlink VRF is a 2 txn process
         (bool upkeepNeeded, ) = checkUpkeep("");
@@ -162,6 +168,10 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
         return s_lotteryState;
     }
 
+    function getInterval() public view returns (uint256) {
+        return i_interval;
+    }
+
     function getNumWords() public pure returns (uint8) {
         return NUM_WORDS;
     }
@@ -172,6 +182,10 @@ contract Lottery is VRFConsumerBaseV2, KeeperCompatibleInterface {
 
     function getLatestTimestamp() public view returns (uint256) {
         return s_lastTimeStamp;
+    }
+
+    function getBlockTimestamp() public view returns (uint256) {
+        return block.timestamp;
     }
 
     function getRequestConfirmations() public pure returns (uint8) {

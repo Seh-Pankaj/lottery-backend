@@ -1,8 +1,7 @@
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-ethers");
+require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-chai-matchers");
 require("hardhat-deploy");
-require("solidity-coverage");
-require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("dotenv").config();
 
@@ -39,5 +38,8 @@ module.exports = {
     noColors: true,
     currency: "INR",
     coinmarketcap: COINMARKETCAP_API_KEY,
+  },
+  mocha: {
+    timeout: 600000,
   },
 };
